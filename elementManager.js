@@ -1,9 +1,3 @@
-/*
- * RENAULTIVO WEB SYSTEM
- * Welcome to the Source Code of the Renaultivo Web System :)
- * RELEASE: 10/19/2020
- * */
-
 ((window)=>{
 
     "use strict";
