@@ -1,3 +1,9 @@
+/*
+ * RENAULTIVO WEB SYSTEM
+ * Welcome to the Source Code of the Renaultivo Web System :)
+ * RELEASE: 10/19/2020
+ * */
+
 ((window)=>{
 
     "use strict";
@@ -7,11 +13,12 @@
     }
 
     window.verify = verify;
+    
+    let upperCaseLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    let lowerCaseLetters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 
     function JSStyleToCss(code, spaced=false) {
 
-		let upperCaseLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-		let lowerCaseLetters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 		let finalCode = '';
 		let allOrganize = [];
 
@@ -48,13 +55,10 @@
     let elementManagerCSSNames = new Array();
     let elementManagerCSSElement = null;
 
-    let elementManagerCSSLetters = [
-        'a', 'b', 'c', 'd', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'x', 'y', 'z', "A", "B", "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "X", "Y", "Z"
-    ];
-
     function getCSSRandomName() {
 
         let randomString = '';
+        let elementManagerCSSLetters = upperCaseLetters.concat(lowerCaseLetters);
 
         for (let i=0; i<7; i++) {
             randomString += elementManagerCSSLetters[Math.floor(Math.random() * 48)];
