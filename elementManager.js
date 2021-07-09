@@ -322,6 +322,26 @@
 
     function setRipple(element, color) {
 
+        function removePointerEvents(e) {
+
+            e.style.pointerEvents = 'none';
+
+            if (e.children[0] != null) {
+
+                for (let i=0; e.children[i] != null; i++) {
+                    removePointerEvents(e.children[i]);
+                }
+
+                return;
+
+            }
+
+        }
+
+        removePointerEvents(element);
+
+        element.style.pointerEvents = 'all';
+
         let lastStyleSettings;
 
         let rippleElement = createElement({
