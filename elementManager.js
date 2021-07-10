@@ -398,9 +398,11 @@
 
                 } else {
 
+                    console.log(e);
+
                     clickInfo.position = {
-                        top: e.layerY,
-                        left: e.layerX
+                        top: e.offsetY,
+                        left: e.offsetX
                     }
 
                 }
