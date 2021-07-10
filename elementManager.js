@@ -341,6 +341,7 @@
         removePointerEvents(element);
 
         element.style.pointerEvents = 'all';
+        element.style.userSelect = 'none';
 
         let lastStyleSettings;
 
@@ -675,6 +676,11 @@
         element.changeClass = (oldClassName, newClassName) => {
             element.classList.remove(oldClassName);
             element.classList.add(newClassName);
+            return element;
+        }
+
+        element.removeClass = (className) => {
+            element.classList.remove(className);
             return element;
         }
 
