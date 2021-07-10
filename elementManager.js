@@ -398,8 +398,6 @@
 
                 } else {
 
-                    console.log(e);
-
                     clickInfo.position = {
                         top: e.offsetY,
                         left: e.offsetX
