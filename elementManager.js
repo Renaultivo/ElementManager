@@ -341,7 +341,6 @@
         removePointerEvents(element);
 
         element.style.pointerEvents = 'all';
-        element.style.userSelect = 'none';
 
         let lastStyleSettings;
 
@@ -400,8 +399,8 @@
                 } else {
 
                     clickInfo.position = {
-                        top: e.offsetY,
-                        left: e.offsetX
+                        top: e.layerY,
+                        left: e.layerX
                     }
 
                 }
