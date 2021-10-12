@@ -31,6 +31,7 @@
     - Do not copy/paste, if you will use it, make it better.
 
  * */
+
 ((window)=>{
 
     "use strict";
@@ -41,27 +42,22 @@
 
     window.verify = verify;
     
-    let upperCaseLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-    let lowerCaseLetters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    let upperCaseLetters = ['_','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+    let lowerCaseLetters = ['_','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 
-    function JSStyleToCss(code, spaced=false) {
+    let cssEvents = [
+        'hover', 'focus', 'active',
+        'valid', 'root', 'checked'
+    ];
+
+    function JSStyleToCss(code) {
 
 		let finalCode = '';
-		let codeSpacing = [];
-
-		if (spaced) {
-			codeSpacing[0] = '  ';
-			codeSpacing[1] = '\n';
-		}
-		else {
-			codeSpacing[0] = '';
-			codeSpacing[1] = '';
-		}
+		
 
 		for (let ob in code) {
 
 			let propName = ob.split('');
-			finalCode += codeSpacing[0];
 
 			for (let l=0; l<propName.length; l++) {
 				let verifyLetter = upperCaseLetters.indexOf(propName[l]);
@@ -71,7 +67,7 @@
 				finalCode += propName[l];
 			}
 
-			finalCode += ':' + code[ob] + ';' + codeSpacing[1];
+			finalCode += ':' + code[ob] + ';';
 
 		}
 
@@ -90,7 +86,7 @@
         let elementManagerCSSLetters = upperCaseLetters.concat(lowerCaseLetters);
 
         for (let i=0; i<7; i++) {
-            randomString += elementManagerCSSLetters[Math.floor(Math.random() * 48)];
+            randomString += elementManagerCSSLetters[Math.floor(Math.random() * elementManagerCSSLetters.length)];
         }
 
         return randomString;
@@ -117,17 +113,13 @@
             }).addTo(document.head);
         }
 
-        elementManagerCSSElement.addText(`.${styleName} {${JSStyleToCss(style)}} `);
+        elementManagerCSSElement.addText(`.${styleName}${ event != null ? `:${event}` : '' } {${JSStyleToCss(style, styleName)}} `);
 
         return styleName;
 
     }
 
     window.createCSS = createCSS;
-
-    let cssEvents = [
-        'hover', 'focus', 'active', 'valid', 'root'
-    ];
 
     function createCSSObject(jsObject) {
 
@@ -147,6 +139,7 @@
                     firstKey = Object.keys(jsObject[key][prop])[0];
 
                     if (typeof jsObject[key][prop][firstKey] == 'object') {
+
                         cssObject[key][prop] = createCSSObject(jsObject[key][prop]);
 
                     } else {
@@ -158,7 +151,9 @@
                 }
 
             } else if (typeof objFirstValue == 'string' || typeof objFirstValue == 'number') {
+
                 cssObject[key] = createCSS(jsObject[key]);
+
             }
 
         }
@@ -168,6 +163,26 @@
     }
 
     window.createCSSObject = createCSSObject;
+
+    function setCSSSelectors(jsStyleName, jsObject) {
+
+        for (let event in jsObject) {
+            elementManagerCSSElement.addText(`.${jsStyleName}:${event} {${JSStyleToCss(jsObject[event])}} `);
+        }
+
+    }
+
+    window.setCSSSelectors = setCSSSelectors;
+
+    function setCSSChildren(jsStyleName, jsObject) {
+
+        for (let child in jsObject) {
+            elementManagerCSSElement.addText(`.${jsStyleName} ${child} {${JSStyleToCss(jsObject[child])}} `);
+        }
+
+    }
+
+    window.setCSSChildren = setCSSChildren;
 
     function setStyle(element, style) {
 
@@ -321,26 +336,6 @@
     }
 
     function setRipple(element, color) {
-
-        function removePointerEvents(e) {
-
-            e.style.pointerEvents = 'none';
-
-            if (e.children[0] != null) {
-
-                for (let i=0; e.children[i] != null; i++) {
-                    removePointerEvents(e.children[i]);
-                }
-
-                return;
-
-            }
-
-        }
-
-        removePointerEvents(element);
-
-        element.style.pointerEvents = 'all';
 
         let lastStyleSettings;
 
@@ -675,11 +670,6 @@
         element.changeClass = (oldClassName, newClassName) => {
             element.classList.remove(oldClassName);
             element.classList.add(newClassName);
-            return element;
-        }
-
-        element.removeClass = (className) => {
-            element.classList.remove(className);
             return element;
         }
 
