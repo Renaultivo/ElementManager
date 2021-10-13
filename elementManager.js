@@ -197,7 +197,7 @@
     function setAttributes(element, attributes) {
 
         for (let att in attributes) {
-            element[att] = attributes[att];
+            element.setAttribute(att, attributes[att]);
         }
 
         return element;
