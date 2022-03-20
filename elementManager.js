@@ -1,8 +1,8 @@
 /*
-  elementManager.js a Renaultivo Project.
- 
-   [🌹] ROSE License - Renaultivo Open-Source Exchange
- 
+    elementManager.js a Renaultivo Project.
+
+    [🌹] ROSE License - Renaultivo Open-Source Exchange
+
     # Most important:
 
     - You can use this software free of charge, for any purpose,
@@ -52,28 +52,28 @@
 
     function JSStyleToCss(code) {
 
-		let finalCode = '';
-		
+        let finalCode = '';
+        
 
-		for (let ob in code) {
+        for (let ob in code) {
 
-			let propName = ob.split('');
+            let propName = ob.split('');
 
-			for (let l=0; l<propName.length; l++) {
-				let verifyLetter = upperCaseLetters.indexOf(propName[l]);
-				if (verifyLetter!=-1) {
-					propName[l] = '-'+lowerCaseLetters[verifyLetter];
-				}
-				finalCode += propName[l];
-			}
+            for (let l=0; l<propName.length; l++) {
+                let verifyLetter = upperCaseLetters.indexOf(propName[l]);
+                if (verifyLetter!=-1) {
+                    propName[l] = '-'+lowerCaseLetters[verifyLetter];
+                }
+                finalCode += propName[l];
+            }
 
-			finalCode += ':' + code[ob] + ';';
+            finalCode += ':' + code[ob] + ';';
 
-		}
+        }
 
-		return finalCode;
+        return finalCode;
 
-	}
+    }
 
     window.JSStyleToCss = JSStyleToCss;
 
@@ -646,15 +646,30 @@
 
         element.on = (props) => {
 
+            if (props.on == null) {
+                
+                for (let event in props) {
+                    on(element, event, props[event], props[event].passive);
+                }
+
+                return element;
+
+            }
+
             if (Array.isArray(props)) {
-                props.forEach((e) => {
-                    on(element, e.on, e.do, e.passive);
-                });
+
+                for (let event in props) {
+                    
+                    on(element, props[event].on, event, props[event].passive);
+
+                }
+
             } else {
                 on(element, props.on, props.do, props.passive);
             }
 
             return element;
+
         }
 
         element.setClass = (className) => {
