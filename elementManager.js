@@ -1,36 +1,36 @@
 /*
-    elementManager.js a Renaultivo Project.
+elementManager.js a Renaultivo Project.
 
-    [🌹] ROSE License - Renaultivo Open-Source Exchange
+[🌹] ROSE License - Renaultivo Open-Source Exchange
 
-    # Most important:
+# Most important:
 
-    - You can use this software free of charge, for any purpose,
-    including commercial applications. Credits are not required
-    but really appreciated.
+- You can use this software free of charge, for any purpose,
+including commercial applications. Credits are not required
+but really appreciated.
 
-    *** How does 🌹ROSE License work? ***
+*** How does 🌹ROSE License work? ***
 
-    We just ask you to help us improve this software with *one*
-    (but more than 1 would be better) of the following items:
+We just ask you to help us improve this software with *one*
+(but more than 1 would be better) of the following items:
 
-    - Help us reporting issues
-    - Implement more functionalities
-    - Tell us where/why are you using this software 
+- Help us reporting issues
+- Implement more functionalities
+- Tell us where/why are you using this software 
 
-    *Note: We accept suggestions/reports in all languages.
+*Note: We accept suggestions/reports in all languages.
 
-    Doing one of the items above you going to help us and the
-    community that uses this project.
+Doing one of the items above you going to help us and the
+community that uses this project.
 
-    # Legal notices:
+# Legal notices:
 
-    - No warranties or liabilities of any kind.
+- No warranties or liabilities of any kind.
 
-    # 🌹ROSE projects have a philosophy:
-    - Do not copy/paste, if you will use it, make it better.
+# 🌹ROSE projects have a philosophy:
+- Do not copy/paste, if you will use it, make it better.
 
- * */
+* */
 
 ((window)=>{
 
@@ -185,6 +185,11 @@
     window.setCSSChildren = setCSSChildren;
 
     function setStyle(element, style) {
+
+        if (typeof style == 'string') {
+            element.setClass(style);
+            return element;
+        }
 
         for (let prop in style) {
             element.style[prop] = style[prop];
@@ -595,8 +600,21 @@
     function setDefaultMethods(element) {
 
         element.setStyle = (style) => {
+
+            if (Array.isArray(style)) {
+
+                style.forEach((s) => {
+                    element.setStyle(s);
+                });
+
+                return element;
+
+            }
+
             setStyle(element, style);
+        
             return element;
+        
         }
 
         element.setAttributes = (attributes) => {
@@ -758,11 +776,13 @@
         }
 
         if (verify(props.style)) {
+
             if (typeof props.style == 'string') {
                 element.addClass(props.style);
             } else {
                 element.setStyle(props.style);
             }
+
         }
 
         if (verify(props.attributes)) {
@@ -820,3 +840,4 @@
     };
 
 })(window);
+    
