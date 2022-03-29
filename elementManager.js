@@ -35,6 +35,8 @@ community that uses this project.
 ((window)=>{
 
     "use strict";
+    ''.__proto__.selectors = function(e) { setCSSSelectors(this.valueOf(), e); };
+    String.__proto__.selectors = function(e) { setCSSSelectors(this.valueOf(), e); };
 
     function verify(data) {
         return data != null && data != undefined && data != NaN && typeof data != "undefined";
@@ -93,6 +95,16 @@ community that uses this project.
 
     }
 
+    function createElementManagerCSSElement() {
+
+        if (elementManagerCSSElement == null) {
+            elementManagerCSSElement = createElement({
+                tag: 'style'
+            }).addTo(document.head);
+        }
+
+    }
+
     function createCSS(style) {
 
         let styleName = getCSSRandomName();
@@ -107,11 +119,7 @@ community that uses this project.
 
         elementManagerCSSNames.push(styleName);
 
-        if (elementManagerCSSElement == null) {
-            elementManagerCSSElement = createElement({
-                tag: 'style'
-            }).addTo(document.head);
-        }
+        createElementManagerCSSElement();
 
         elementManagerCSSElement.addText(`.${styleName}${ event != null ? `:${event}` : '' } {${JSStyleToCss(style, styleName)}} `);
 
@@ -166,6 +174,8 @@ community that uses this project.
 
     function setCSSSelectors(jsStyleName, jsObject) {
 
+        createElementManagerCSSElement();
+
         for (let event in jsObject) {
             elementManagerCSSElement.addText(`.${jsStyleName}:${event} {${JSStyleToCss(jsObject[event])}} `);
         }
@@ -185,11 +195,6 @@ community that uses this project.
     window.setCSSChildren = setCSSChildren;
 
     function setStyle(element, style) {
-
-        if (typeof style == 'string') {
-            element.setClass(style);
-            return element;
-        }
 
         for (let prop in style) {
             element.style[prop] = style[prop];
@@ -343,10 +348,13 @@ community that uses this project.
     function setRipple(element, color) {
 
         let lastStyleSettings;
+        let computedStyle = getComputedStyle(element);
+
+        const elementZIndex = element.style.zIndex != "" ? element.style.zIndex - 1 : computedStyle.zIndex - 1;
 
         let rippleElement = createElement({
             style: {
-                zIndex: element.style.zIndex != "" ? element.style.zIndex - 1 : -1,
+                zIndex: elementZIndex,
                 position: 'absolute',
                 transform: 'scale(1)',
                 borderRadius: '50%',
@@ -392,15 +400,15 @@ community that uses this project.
                 if (e.type == 'touchstart') {
 
                     clickInfo.position = {
-                        top: e.changedTouches[0].clientY - this.offsetTop,
-                        left: e.changedTouches[0].clientX - this.offsetLeft
+                        top: e.changedTouches[0].clientY - element.offsetTop,
+                        left: e.changedTouches[0].clientX - element.offsetLeft
                     }
 
                 } else {
 
                     clickInfo.position = {
-                        top: e.layerY,
-                        left: e.layerX
+                        top: e.pageY - element.offsetTop,
+                        left: e.pageX - element.offsetLeft
                     }
 
                 }
@@ -413,8 +421,7 @@ community that uses this project.
                     element.style.position = 'relative';
                 }
 
-                if (lastStyleSettings.zIndex == "auto"
-                || lastStyleSettings.zIndex == ""
+                if (elementZIndex == "auto"
                 || element.style.zIndex == 'auto'
                 || element.style.zIndex == '') {
                     element.style.zIndex = 1;
@@ -427,7 +434,7 @@ community that uses this project.
                     left: `${clickInfo.position.left - (rippleSize/2)}px`,
                     width: `${rippleSize}px`,
                     height: `${rippleSize}px`,
-                    zIndex: element.style.zIndex-2,
+                    zIndex: elementZIndex-2,
                     opacity: 1,
                     animation: 'ripple linear 1.5s'
                 });
@@ -599,12 +606,18 @@ community that uses this project.
 
     function setDefaultMethods(element) {
 
-        element.setStyle = (style) => {
+        element.setStyle = (style, previous=null) => {
 
             if (Array.isArray(style)) {
-
+                
                 style.forEach((s) => {
-                    element.setStyle(s);
+
+                    if (typeof s == 'string') {
+                        element.addClass(s);
+                    } else {
+                        element.setStyle(s);
+                    }
+                
                 });
 
                 return element;
@@ -700,6 +713,11 @@ community that uses this project.
             return element;
         }
 
+        element.removeClass = (className) => {
+            element.className = element.className.replace(className, '');
+            return element;
+        }
+
         element.changeClass = (oldClassName, newClassName) => {
             element.classList.remove(oldClassName);
             element.classList.add(newClassName);
@@ -760,7 +778,11 @@ community that uses this project.
         }
 
         if (verify(props.class)) {
-            element.setClass(props.class);
+
+            props.class.split(' ').forEach((className) => {
+                className != '' ? element.addClass(className) : '';
+            });
+
         }
 
         if (verify(props.content)) {
