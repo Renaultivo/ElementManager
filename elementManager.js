@@ -339,7 +339,7 @@ community that uses this project.
 
         }
 
-        element.addEventListener(event, action, { passive });
+        element.addEventListener(event.toLowerCase(), action, { passive });
 
         return element;
 
@@ -862,4 +862,3 @@ community that uses this project.
     };
 
 })(window);
-    
