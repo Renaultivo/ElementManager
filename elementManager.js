@@ -406,9 +406,11 @@ community that uses this project.
 
                 } else {
 
+                    console.log(e);
+
                     clickInfo.position = {
-                        top: e.pageY - element.offsetTop,
-                        left: e.pageX - element.offsetLeft
+                        top: e.offsetY,
+                        left: e.offsetX
                     }
 
                 }
