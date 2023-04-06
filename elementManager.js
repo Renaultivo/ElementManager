@@ -32,833 +32,929 @@ community that uses this project.
 
 * */
 
-((window)=>{
+((window) => {
 
-    "use strict";
-    ''.__proto__.selectors = function(e) { setCSSSelectors(this.valueOf(), e); };
-    String.__proto__.selectors = function(e) { setCSSSelectors(this.valueOf(), e); };
+	class StyleString extends String {
 
-    function verify(data) {
-        return data != null && data != undefined && data != NaN && typeof data != "undefined";
-    }
+		on(e) {
+			setCSSSelectors(this.valueOf(), e);
+		}
 
-    window.verify = verify;
-    
-    let upperCaseLetters = ['_','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-    let lowerCaseLetters = ['_','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+		props(e) {
+			setCSSProps(this.valueOf(), e);
+		}
 
-    let cssEvents = [
-        'hover', 'focus', 'active',
-        'valid', 'root', 'checked'
-    ];
+		selectors(e) {
+			setCSSSelectors(this.valueOf(), e);
+		}
 
-    function JSStyleToCss(code) {
+	};
 
-        let finalCode = '';
-        
+	window.StyleString = StyleString;
 
-        for (let ob in code) {
+	function parseObjectKeysToStyleString(obj) {
 
-            let propName = ob.split('');
+		let result = new Object();
 
-            for (let l=0; l<propName.length; l++) {
-                let verifyLetter = upperCaseLetters.indexOf(propName[l]);
-                if (verifyLetter!=-1) {
-                    propName[l] = '-'+lowerCaseLetters[verifyLetter];
-                }
-                finalCode += propName[l];
-            }
+		for (let prop in obj) {
 
-            finalCode += ':' + code[ob] + ';';
+			if (typeof obj[prop] == 'object') {
+				result[prop] = parseObjectKeysToStyleString(obj[prop]);
+			} else {
+				result[prop] = new StyleString(obj[prop]);
+			}
 
-        }
+		}
 
-        return finalCode;
+		return result;
 
-    }
+	}
 
-    window.JSStyleToCss = JSStyleToCss;
+	window.parseObjectKeysToStyleString = parseObjectKeysToStyleString;
 
-    let elementManagerCSSNames = new Array();
-    let elementManagerCSSElement = null;
 
-    function getCSSRandomName() {
+	"use strict";
 
-        let randomString = '';
-        let elementManagerCSSLetters = upperCaseLetters.concat(lowerCaseLetters);
+	function verify(data) {
+		return data != null && data != undefined && data != NaN && typeof data != "undefined";
+	}
 
-        for (let i=0; i<7; i++) {
-            randomString += elementManagerCSSLetters[Math.floor(Math.random() * elementManagerCSSLetters.length)];
-        }
+	window.verify = verify;
 
-        return randomString;
+	let upperCaseLetters = ['_', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+	let lowerCaseLetters = ['_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-    }
+	let cssEvents = [
+		'hover', 'focus', 'active',
+		'valid', 'root', 'checked'
+	];
 
-    function createElementManagerCSSElement() {
+	// TODO: Improve uppercase-check with rejex
+	function JSStyleToCss(code) {
 
-        if (elementManagerCSSElement == null) {
-            elementManagerCSSElement = createElement({
-                tag: 'style'
-            }).addTo(document.head);
-        }
+		let finalCode = '';
 
-    }
+		for (let ob in code) {
 
-    function createCSS(style) {
+			let propName = ob.split('');
 
-        let styleName = getCSSRandomName();
+			for (let l = 0; l < propName.length; l++) {
 
-        if (elementManagerCSSNames.indexOf(styleName) != -1) {
+				let verifyLetter = upperCaseLetters.indexOf(propName[l]);
 
-            while (elementManagerCSSNames.indexOf(styleName) != -1) {
-                styleName = getCSSRandomName();
-            }
+				if (verifyLetter != -1) {
+					propName[l] = '-' + lowerCaseLetters[verifyLetter];
+				}
 
-        }
+				finalCode += propName[l];
 
-        elementManagerCSSNames.push(styleName);
+			}
 
-        createElementManagerCSSElement();
+			finalCode += ':' + code[ob] + ';';
 
-        elementManagerCSSElement.addText(`.${styleName}${ event != null ? `:${event}` : '' } {${JSStyleToCss(style, styleName)}} `);
+		}
 
-        return styleName;
+		return finalCode;
 
-    }
+	}
 
-    window.createCSS = createCSS;
+	window.JSStyleToCss = JSStyleToCss;
 
-    function createCSSObject(jsObject) {
+	let elementManagerCSSNames = new Array();
+	let elementManagerCSSElement = null;
 
-        let cssObject = new Object();
+	function getCSSRandomName() {
 
-        for (let key in jsObject) {
+		let randomString = '';
+		let elementManagerCSSLetters = upperCaseLetters.concat(lowerCaseLetters);
 
-            let firstKey = Object.keys(jsObject[key])[0];
-            let objFirstValue = jsObject[key][firstKey];
+		for (let i = 0; i < 7; i++) {
+			randomString += elementManagerCSSLetters[Math.floor(Math.random() * elementManagerCSSLetters.length)];
+		}
 
-            if (typeof objFirstValue == 'object') {
+		return randomString;
 
-                cssObject[key] = new Object();
+	}
 
-                for (let prop in jsObject[key]) {
+	function createElementManagerCSSElement() {
 
-                    firstKey = Object.keys(jsObject[key][prop])[0];
+		if (elementManagerCSSElement == null) {
+			elementManagerCSSElement = createElement({
+				tag: 'style'
+			}).addTo(document.head);
+		}
 
-                    if (typeof jsObject[key][prop][firstKey] == 'object') {
+	}
 
-                        cssObject[key][prop] = createCSSObject(jsObject[key][prop]);
+	function createCSS(style) {
 
-                    } else {
+		let styleName = getCSSRandomName();
 
-                        cssObject[key][prop] = createCSS(jsObject[key][prop]);
+		if (elementManagerCSSNames.indexOf(styleName) != -1) {
 
-                    }
+			while (elementManagerCSSNames.indexOf(styleName) != -1) {
+				styleName = getCSSRandomName();
+			}
 
-                }
+		}
 
-            } else if (typeof objFirstValue == 'string' || typeof objFirstValue == 'number') {
+		styleName = new StyleString(StyleString);
 
-                cssObject[key] = createCSS(jsObject[key]);
+		elementManagerCSSNames.push(styleName);
 
-            }
+		createElementManagerCSSElement();
 
-        }
+		elementManagerCSSElement.addText(`.${styleName} {${JSStyleToCss(style, styleName)}} `);
 
-        return cssObject;
+		return styleName;
 
-    }
+	}
 
-    window.createCSSObject = createCSSObject;
+	window.createCSS = createCSS;
 
-    function setCSSSelectors(jsStyleName, jsObject) {
+	function createCSSObject(jsObject) {
 
-        createElementManagerCSSElement();
+		let cssObject = new Object();
 
-        for (let event in jsObject) {
-            elementManagerCSSElement.addText(`.${jsStyleName}:${event} {${JSStyleToCss(jsObject[event])}} `);
-        }
+		for (let key in jsObject) {
 
-    }
+			let firstKey = Object.keys(jsObject[key])[0];
+			let objFirstValue = jsObject[key][firstKey];
 
-    window.setCSSSelectors = setCSSSelectors;
+			if (typeof objFirstValue == 'object') {
 
-    function setCSSChildren(jsStyleName, jsObject) {
+				cssObject[key] = new Object();
 
-        for (let child in jsObject) {
-            elementManagerCSSElement.addText(`.${jsStyleName} ${child} {${JSStyleToCss(jsObject[child])}} `);
-        }
+				for (let prop in jsObject[key]) {
 
-    }
+					firstKey = Object.keys(jsObject[key][prop])[0];
 
-    window.setCSSChildren = setCSSChildren;
+					if (typeof jsObject[key][prop][firstKey] == 'object') {
 
-    function setStyle(element, style) {
+						cssObject[key][prop] = createCSSObject(jsObject[key][prop]);
 
-        for (let prop in style) {
-            element.style[prop] = style[prop];
-        }
+					} else {
 
-        return element;
+						cssObject[key][prop] = new StyleString(createCSS(jsObject[key][prop]));
 
-    }
+						console.log(cssObject[key][prop]);
 
-    function setAttributes(element, attributes) {
+					}
 
-        for (let att in attributes) {
-            element.setAttribute(att, attributes[att]);
-        }
+				}
 
-        return element;
+			} else if (typeof objFirstValue == 'string' || typeof objFirstValue == 'number') {
 
-    }
+				cssObject[key] = new StyleString(createCSS(jsObject[key]));
 
-    function addTo(area, element) {
-        area.appendChild(element);
-        return element;
-    }
+			}
 
-    function clearElement(element) {
-        
-        for (let content in element.children) {
+		}
 
-            if (typeof element.children[content] == 'object') {
-                element.removeChild(element.children[content]);
-            }
+		return cssObject;
 
-        }
+	}
 
-        return element;
+	window.createCSSObject = createCSSObject;
 
-    }
+	function setCSSSelectors(jsStyleName, jsObject) {
 
-    function setContent(element, content) {
-        
-        clearElement(element);
+		createElementManagerCSSElement();
 
-        if (typeof content == 'string' || typeof content == 'number') {
-            content = document.createTextNode(content);
-        }
+		for (let event in jsObject) {
+			elementManagerCSSElement.addText(`.${jsStyleName}:${event} {${JSStyleToCss(jsObject[event])}} `);
+		}
 
-        if (Array.isArray(content)) {
-            
-            content.forEach((c) => {
-                addContent(element, c);
-            });
+	}
 
-        } else {
-            element.appendChild(content);
-        }
+	window.setCSSSelectors = setCSSSelectors;
 
-        return element;
+	function setCSSProps(jsStyleName, jsObject) {
 
-    }
+		createElementManagerCSSElement();
 
-    function clearElement(element) {
-        
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+		for (let prop in jsObject) {
+			elementManagerCSSElement.addText(`.${jsStyleName}${prop} {${JSStyleToCss(jsObject[prop])}} `);
+		}
 
-        return element;
+	}
 
-    }
+	window.setCSSProps = setCSSProps;
 
-    function addContent(element, content) {
-        
-        if (typeof content == 'string' || typeof content == 'number') {
-            content = document.createTextNode(content);
-        }
+	function setCSSChildren(jsStyleName, jsObject) {
 
-        if (Array.isArray(content)) {
+		for (let child in jsObject) {
+			elementManagerCSSElement.addText(`.${jsStyleName} ${child} {${JSStyleToCss(jsObject[child])}} `);
+		}
 
-            content.forEach((c) => {
-                addContent(element, c);
-            });
+	}
 
-        } else {
+	window.setCSSChildren = setCSSChildren;
 
-            element.appendChild(content);
+	function setStyle(element, style) {
 
-        }
+		for (let prop in style) {
+			element.style[prop] = style[prop];
+		}
 
-        return element;
+		return element;
 
-    }
+	}
 
-    function setText(element, text) {
-        element.innerText = text;
-        return element;
-    }
+	function setAttributes(element, attributes) {
 
-    function addText(element, text) {
-        element.innerText += text;
-        return element;
-    }
+		for (let att in attributes) {
+			element.setAttribute(att, attributes[att]);
+		}
 
-    function changeText(element, oldText, newText) {
-        element.innerText = element.innerText.replace(oldText, newText);
-        return element;
-    }
+		return element;
 
-    function changeContent(element, oldContent, newContent) {
-        element.replaceChildren(oldContent, newContent);
-        return element;
-    }
+	}
 
-    function on(element, event, action, passive = null) {
+	function addTo(area, element) {
+		area.appendChild(element);
+		return element;
+	}
 
-        if (Array.isArray(element)) {
+	function clearElement(element) {
 
-            element.forEach((e) => {
-                on(e, event, action);
-            });
+		for (let content in element.children) {
 
-            return element;
+			if (typeof element.children[content] == 'object') {
+				element.removeChild(element.children[content]);
+			}
 
-        }
+		}
 
-        if (Array.isArray(event)) {
+		return element;
 
-            event.forEach((e) => {
-                on(element, e, action);
-            });
+	}
 
-            return element;
+	function setContent(element, content) {
 
-        }
+		clearElement(element);
 
-        if (Array.isArray(action)) {
+		if (typeof content == 'string' || typeof content == 'number') {
+			content = document.createTextNode(content);
+		}
 
-            action.forEach((a) => {
-                on(e, a);
-            });
+		if (Array.isArray(content)) {
 
-            return element;
+			content.forEach((c) => {
+				addContent(element, c);
+			});
 
-        }
+		} else {
+			element.appendChild(content);
+		}
 
-        element.addEventListener(event.toLowerCase(), action, { passive });
+		return element;
 
-        return element;
+	}
 
-    }
+	function clearElement(element) {
 
-    function setRipple(element, color) {
+		while (element.firstChild) {
+			element.removeChild(element.firstChild);
+		}
 
-        let lastStyleSettings;
-        let computedStyle = getComputedStyle(element);
+		return element;
 
-        const elementZIndex = element.style.zIndex != "" ? element.style.zIndex - 1 : computedStyle.zIndex - 1;
+	}
 
-        let rippleElement = createElement({
-            style: {
-                zIndex: elementZIndex,
-                position: 'absolute',
-                transform: 'scale(1)',
-                borderRadius: '50%',
-                pointerEvents: 'none',
-                backgroundColor: color,
-                transitionDuration: '0.3s'
-            }
-        });
+	function addContent(element, content) {
 
-        rippleElement.active = false;
+		if (typeof content == 'string' || typeof content == 'number') {
+			content = document.createTextNode(content);
+		}
 
-        let rippleSize;
+		if (Array.isArray(content)) {
 
-        let clickInfo = {
-            time: null,
-            canceled: false,
-            position: {
-                top: 0,
-                left: 0
-            }
-        }
+			content.forEach((c) => {
+				addContent(element, c);
+			});
 
-        element.on({
-            on: ['mousedown', 'touchstart'],
-            do: function(e) {
+		} else {
 
-                if (rippleElement.active === true) {
-                    return;
-                }
+			element.appendChild(content);
 
-                let computedStyle = window.getComputedStyle(element);
+		}
 
-                lastStyleSettings = {
-                    overflow: element.style.overflow,
-                    transform: element.style.transform,
-                    position: computedStyle.position,
-                    zIndex: computedStyle.zIndex
-                };
+		return element;
 
-                clickInfo.canceled = false;
-                clickInfo.time = new Date().getTime();
-                
-                if (e.type == 'touchstart') {
+	}
 
-                    clickInfo.position = {
-                        top: e.changedTouches[0].clientY - element.offsetTop,
-                        left: e.changedTouches[0].clientX - element.offsetLeft
-                    }
+	function setText(element, text) {
+		element.innerText = text;
+		return element;
+	}
 
-                } else {
+	function addText(element, text) {
+		element.innerText += text;
+		return element;
+	}
 
-                    clickInfo.position = {
-                        top: e.offsetY,
-                        left: e.offsetX
-                    }
+	function changeText(element, oldText, newText) {
+		element.innerText = element.innerText.replace(oldText, newText);
+		return element;
+	}
 
-                }
+	function changeContent(element, oldContent, newContent) {
+		element.replaceChildren(oldContent, newContent);
+		return element;
+	}
 
-                element.style.overflow = 'hidden';
+	function on(element, event, action, passive = null) {
 
-                if (lastStyleSettings.position == "static"
-                || (lastStyleSettings.position == ""
-                    && element.style.position == '')) {
-                    element.style.position = 'relative';
-                }
+		if (Array.isArray(element)) {
 
-                if (elementZIndex == "auto"
-                || element.style.zIndex == 'auto'
-                || element.style.zIndex == '') {
-                    element.style.zIndex = 1;
-                }
+			element.forEach((e) => {
+				on(e, event, action);
+			});
 
-                rippleSize = Math.max(element.offsetWidth, element.offsetHeight) * 3;
+			return element;
 
-                rippleElement.setStyle({
-                    top: `${clickInfo.position.top - (rippleSize/2)}px`,
-                    left: `${clickInfo.position.left - (rippleSize/2)}px`,
-                    width: `${rippleSize}px`,
-                    height: `${rippleSize}px`,
-                    zIndex: elementZIndex-2,
-                    opacity: 1,
-                    animation: 'ripple linear 1.5s'
-                });
+		}
 
-                this.appendChild(rippleElement);
+		if (Array.isArray(event)) {
 
-                rippleElement.active = true;
+			event.forEach((e) => {
+				on(element, e, action);
+			});
 
-            }
-        });
+			return element;
 
-        element.on({
-            on: ['mouseup', 'mouseleave', 'touchend'],
-            do: () => {
+		}
 
-                if (!rippleElement.active
-                    || clickInfo.canceled) {
-                    return;
-                }
+		if (Array.isArray(action)) {
 
-                clickInfo.canceled = true;
+			action.forEach((a) => {
+				on(e, a);
+			});
 
-                let currentRippleSize = rippleSize * ((new Date().getTime() - clickInfo.time) / 1500);
+			return element;
 
-                rippleElement.setStyle({
-                    top: `${clickInfo.position.top - (currentRippleSize/2)}px`,
-                    left: `${clickInfo.position.left - (currentRippleSize/2)}px`,
-                    width: `${currentRippleSize}px`,
-                    height: `${currentRippleSize}px`,
-                    opacity: 1,
-                    animation: '',
-                    transform: `scale(1)`,
-                    transitionDuration: '0s'
-                });
+		}
 
-                setTimeout(() => {
+		element.addEventListener(event.toLowerCase(), action, { passive });
 
-                    rippleElement.setStyle({
-                        opacity: 0.6,
-                        transform: `scale(${rippleSize/currentRippleSize})`,
-                        transitionDuration: '0.5s'
-                    });
+		return element;
 
-                }, 20);
-                
-                setTimeout(()=>{
+	}
 
-                    rippleElement.setStyle({
-                        opacity: 0
-                    });
+	function setRipple(element, color) {
 
-                }, 290);
-                
-                setTimeout(()=>{
+		let lastStyleSettings;
+		let appliedStyleSettings;
+		let computedStyle = getComputedStyle(element);
 
-                    if (rippleElement.active === true && rippleElement.parentElement != null) {
-                        rippleElement.active = false;
-                        element.style.overflow = lastStyleSettings.overflow;
-                        element.style.position = lastStyleSettings.position;
-                        element.style.zIndex = lastStyleSettings.zIndex;
-                        element.removeChild(rippleElement);
-                    }
+		const elementZIndex = element.style.zIndex != "" ? element.style.zIndex - 1 : computedStyle.zIndex - 1;
 
-                }, 390);
+		let rippleElement = createElement({
+			style: {
+				zIndex: elementZIndex,
+				position: 'absolute',
+				transform: 'scale(1)',
+				borderRadius: '50%',
+				pointerEvents: 'none',
+				backgroundColor: color,
+				transitionDuration: '0.3s'
+			}
+		});
 
-            }
-        });
+		rippleElement.active = false;
 
-    }
+		let rippleSize;
 
-    function setContextMenu(props) {
+		let clickInfo = {
+			time: null,
+			canceled: false,
+			position: {
+				top: 0,
+				left: 0
+			}
+		}
 
-        if (!props.margin) {
-            props.margin = {
-                vertical: 0,
-                horizontal: 0
-            }
-        }
+		element.on({
+			on: ['mousedown', 'touchstart'],
+			do: function (e) {
 
-        props.element.contextMenuEnable = true;
-        props.menu.style.display = 'none';
+				if (rippleElement.active === true) {
+					return;
+				}
 
-        let contextElementArea = createElement({
-            style: {
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: verify(props.zIndex) ? props.zIndex : 100,
-                position: 'fixed',
-                pointerEvents: 'all',
-                backgroundColor: 'transparent'
-            },
-            content: props.menu
-        });
+				let computedStyle = window.getComputedStyle(element);
 
-        props.element.on({
-            on: 'contextmenu',
-            do: function(e) {
+				lastStyleSettings = {
+					overflow: element.style.overflow,
+					transform: element.style.transform,
+					position: computedStyle.position || element.style.position,
+					zIndex: computedStyle.zIndex || element.style.position,
+					padding: computedStyle.padding || element.style.padding,
+					minWidth: computedStyle.minWidth || element.style.minWidth,
+				};
 
-                e.preventDefault();
+				clickInfo.canceled = false;
+				clickInfo.time = new Date().getTime();
 
-                if (e.srcElement.contextMenuEnable
-                    && e.srcElement != this) {
-                    return;
-                }
+				if (e.type == 'touchstart') {
 
-                if (contextElementArea.parentElement != null) {
-                    
-                    document.body.removeChild(contextElementArea);
-                    
-                    if (props.onClose != null) {
-                        props.onClose(e);
-                    }
+					const rect = element.getBoundingClientRect();
 
-                    return;
+					clickInfo.position = {
+						top: e.changedTouches[0].clientY - rect.top,
+						left: e.changedTouches[0].clientX - rect.left
+					}
 
-                }
+				} else {
 
-                let position = {
-                    top: e.clientY,
-                    left: e.clientX
-                }
+					clickInfo.position = {
+						top: e.offsetY + (e.srcElement == element ? 0 : e.layerY),
+						left: e.offsetX + (e.srcElement == element ? 0 : e.layerX)
+					}
 
-                contextElementArea.addTo(document.body);
+				}
 
-                props.menu.style.display = 'flex';
+				element.style.minWidth = `${element.getBoundingClientRect().width - (parseFloat(computedStyle.padding) * 2)}px`;
 
-                if (props.onOpen != null) {
-                    props.onOpen(e);
-                }
+				element.style.overflow = 'hidden';
 
-                if ((position.top + props.menu.offsetHeight + props.margin.vertical) > document.body.offsetHeight) {
-                    position.top = document.body.offsetHeight - props.margin.vertical - props.menu.offsetHeight;
-                }
+				if (lastStyleSettings.position == "static"
+					|| (lastStyleSettings.position == ""
+						&& element.style.position == '')) {
+					element.style.position = 'relative';
+				}
 
-                if ((position.left + props.menu.offsetWidth + props.margin.horizontal) > document.body.offsetWidth) {
-                    position.left = document.body.offsetWidth - props.margin.horizontal - props.menu.offsetHeight;
-                }
+				if (elementZIndex == "auto"
+					|| element.style.zIndex == 'auto'
+					|| element.style.zIndex == '') {
+					element.style.zIndex = 1;
+				}
 
-                props.menu.setStyle({
-                    top: `${position.top}px`,
-                    left: `${position.left}px`
-                });
+				/* Using template strings was the only way found to prevent
+				 * the browser from assiging a memory-reference of the element.style[xxx];
+				 * We need the raw value of each style to check if the programmer did any
+				 * style update while the ripple-effect was running.
+				 **/
+				appliedStyleSettings = {
+					overflow: `${element.style.overflow}`,
+					transform: `${element.style.transform}`,
+					position: `${element.style.position}`,
+					zIndex: `${element.style.position}`,
+					minWidth: `${element.style.minWidth}`,
+				}
 
-            }
-        });
+				rippleSize = Math.max(element.offsetWidth, element.offsetHeight) * 3;
 
-        contextElementArea.on({
-            on: ['click', 'contextmenu'],
-            do: (e) =>{
+				rippleElement.setStyle({
+					top: `${clickInfo.position.top - (rippleSize / 2)}px`,
+					left: `${clickInfo.position.left - (rippleSize / 2)}px`,
+					width: `${rippleSize}px`,
+					height: `${rippleSize}px`,
+					zIndex: elementZIndex - 2,
+					opacity: 1,
+					animation: 'ripple linear 1.5s'
+				});
 
-                e.preventDefault();
-                
-                if (contextElementArea.parentElement != null) {
+				this.appendChild(rippleElement);
 
-                    document.body.removeChild(contextElementArea);
+				rippleElement.active = true;
 
-                    if (props.onClose != null) {
-                        props.onClose(e);
-                    }
+			}
+		});
 
-                }
+		element.on({
+			on: ['mouseup', 'mouseleave', 'touchend'],
+			do: () => {
 
-            }
-        });
+				if (!rippleElement.active
+					|| clickInfo.canceled) {
+					return;
+				}
 
-    }
+				clickInfo.canceled = true;
 
-    function setDefaultMethods(element) {
+				let currentRippleSize = rippleSize * ((new Date().getTime() - clickInfo.time) / 1500);
 
-        element.setStyle = (style, previous=null) => {
+				rippleElement.setStyle({
+					top: `${clickInfo.position.top - (currentRippleSize / 2)}px`,
+					left: `${clickInfo.position.left - (currentRippleSize / 2)}px`,
+					width: `${currentRippleSize}px`,
+					height: `${currentRippleSize}px`,
+					opacity: 1,
+					animation: '',
+					transform: `scale(1)`,
+					transitionDuration: '0s'
+				});
 
-            if (Array.isArray(style)) {
-                
-                style.forEach((s) => {
+				setTimeout(() => {
 
-                    if (typeof s == 'string') {
-                        element.addClass(s);
-                    } else {
-                        element.setStyle(s);
-                    }
-                
-                });
+					rippleElement.setStyle({
+						opacity: 0.6,
+						transform: `scale(${rippleSize / currentRippleSize})`,
+						transitionDuration: '0.5s'
+					});
 
-                return element;
+				}, 20);
 
-            }
+				setTimeout(() => {
 
-            setStyle(element, style);
-        
-            return element;
-        
-        }
+					rippleElement.setStyle({
+						opacity: 0
+					});
 
-        element.setAttributes = (attributes) => {
-            setAttributes(element, attributes);
-            return element;
-        }
+				}, 290);
 
-        element.addTo = (area) => {
-            addTo(area, element);
-            return element;
-        }
+				setTimeout(() => {
 
-        element.setContent = (content) => {
-            setContent(element, content);
-            return element;
-        }
+					/**
+					 * Prevent the elementManager from overwriting styles that were set
+					 * while the ripple effect was running. 
+					 * */
+					function checkBeforeUpdate(prop, value) {
 
-        element.addContent = (content) => {
-            addContent(element, content);
-            return element;
-        }
+						if (element.style[prop] == appliedStyleSettings[prop]) {
+							element.style[prop] = lastStyleSettings[prop];
+						}
 
-        element.changeContent = (oldContent, newContent) => {
-            changeContent(element, oldContent, newContent);
-            return element;
-        }
+					}
 
-        element.setText = (text) => {
-            setText(element, text);
-            return element;
-        }
+					if (rippleElement.active === true && rippleElement.parentElement != null) {
+						rippleElement.active = false;
+						checkBeforeUpdate('overflow');
+						checkBeforeUpdate('position');
+						checkBeforeUpdate('zIndex');
+						checkBeforeUpdate('minWidth');
+						element.removeChild(rippleElement);
+					}
 
-        element.addText = (text) => {
-            addText(element, text);
-            return element;
-        }
+				}, 390);
 
-        element.setHTML = (htmlString) => {
-            element.innerHTML = htmlString;
-            return element;
-        }
+			}
+		});
 
-        element.changeText = (oldText, newText) => {
-            changeText(element, oldText, newText);
-            return element;
-        }
+	}
 
-        element.on = (props) => {
+	function setContextMenu(props) {
 
-            if (props.on == null) {
-                
-                for (let event in props) {
-                    on(element, event, props[event], props[event].passive);
-                }
+		if (!props.margin) {
+			props.margin = {
+				vertical: 0,
+				horizontal: 0
+			}
+		}
 
-                return element;
+		props.element.contextMenuEnable = true;
+		props.menu.style.position = 'fixed';
+		props.menu.style.display = 'none';
 
-            }
+		let contextElementArea = createElement({
+			style: {
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+				zIndex: verify(props.zIndex) ? props.zIndex : 100,
+				position: 'fixed',
+				pointerEvents: 'all',
+				backgroundColor: 'transparent'
+			},
+			content: props.menu
+		});
 
-            if (Array.isArray(props)) {
+		props.element.on({
+			on: 'contextmenu',
+			do: function (e) {
 
-                for (let event in props) {
-                    
-                    on(element, props[event].on, event, props[event].passive);
+				e.preventDefault();
 
-                }
+				if (e.srcElement.contextMenuEnable
+					&& e.srcElement != this) {
+					return;
+				}
 
-            } else {
-                on(element, props.on, props.do, props.passive);
-            }
+				if (contextElementArea.parentElement != null) {
 
-            return element;
+					document.body.removeChild(contextElementArea);
 
-        }
+					if (props.onClose != null) {
+						props.onClose(e);
+					}
 
-        element.setClass = (className) => {
-            element.className = className;
-            return element;
-        }
+					return;
 
-        element.addClass = (className) => {
-            element.classList.add(className);
-            return element;
-        }
+				}
 
-        element.removeClass = (className) => {
-            element.className = element.className.replace(className, '');
-            return element;
-        }
+				let position = {
+					top: e.clientY,
+					left: e.clientX
+				}
 
-        element.changeClass = (oldClassName, newClassName) => {
-            element.classList.remove(oldClassName);
-            element.classList.add(newClassName);
-            return element;
-        }
+				contextElementArea.addTo(document.body);
 
-        element.setID = (id) => {
-            element.id = id;
-            return element;
-        }
+				props.menu.style.display = 'flex';
 
-        element.addID = (id) => {
-            element.id.concat(' ' + id);
-            return element;
-        }
+				if (props.onOpen != null) {
+					props.onOpen(e);
+				}
 
-        element.changeID = (oldID, newID) => {
-            element.id = element.id.replace(oldID, newID);
-            return element;
-        }
+				if ((position.top + props.menu.offsetHeight + props.margin.vertical) > document.body.offsetHeight) {
+					position.top = document.body.offsetHeight - props.margin.vertical - props.menu.offsetHeight;
+				}
 
-        element.setRipple = (color) => {
-            setRipple(element, color);
-            return element;
-        }
+				if ((position.left + props.menu.offsetWidth + props.margin.horizontal) > document.body.offsetWidth) {
+					position.left = document.body.offsetWidth - props.margin.horizontal - props.menu.offsetHeight;
+				}
 
-        element.clear = () => {
-            clearElement(element);
-            return element;
-        }
+				// TODO: fix top
 
-        element.setContextMenu = (props = {
-            vertical: 0,
-            horizontal: 0
-        }) => {
+				props.menu.setStyle({
+					top: `${e.clientY}px`,
+					left: `${position.left}px`
+				});
 
-            setContextMenu({
-                element,
-                ...props
-            });
+			}
+		});
 
-            return element;
+		contextElementArea.on({
+			on: ['click', 'contextmenu'],
+			do: (e) => {
 
-        }
+				e.preventDefault();
 
-        return element;
+				if (contextElementArea.parentElement != null) {
 
-    }
+					document.body.removeChild(contextElementArea);
 
-    function createElement(props = {}) {
+					if (props.onClose != null) {
+						props.onClose(e);
+					}
 
-        let element = document.createElement(verify(props.tag) ? props.tag : 'div');
-        
-        setDefaultMethods(element);
+				}
 
-        if (verify(props.id)) {
-            element.setID(props.id);
-        }
+			}
+		});
 
-        if (verify(props.class)) {
+	}
 
-            props.class.split(' ').forEach((className) => {
-                className != '' ? element.addClass(className) : '';
-            });
+	function setDefaultMethods(element) {
 
-        }
+		element.setStyle = (style, previous = null) => {
 
-        if (verify(props.content)) {
-            element.setContent(props.content);
-        }
+			if (Array.isArray(style)) {
 
-        if (verify(props.html)) {
-            element.setHTML(props.html);
-        }
+				style.forEach((s) => {
 
-        if (verify(props.event)) {
-            element.on(props.event);
-        }
+					if (typeof s == 'string'
+						|| s instanceof StyleString) {
+						element.addClass(s);
+					} else {
+						element.setStyle(s);
+					}
 
-        if (verify(props.style)) {
+				});
 
-            if (typeof props.style == 'string') {
-                element.addClass(props.style);
-            } else {
-                element.setStyle(props.style);
-            }
+				return element;
 
-        }
+			}
 
-        if (verify(props.attributes)) {
-            element.setAttributes(props.attributes);
-        }
+			setStyle(element, style);
 
-        if (verify(props.ripple)) {
-            element.setRipple(props.ripple);
-        }
+			return element;
 
-        if (verify(props.contextMenu)) {
-            element.setContextMenu({ element, ...props.contextMenu});
-        }
+		}
 
-        return element;
+		element.setAttributes = (attributes) => {
+			setAttributes(element, attributes);
+			return element;
+		}
 
-    }
+		element.addTo = (area) => {
+			addTo(area, element);
+			return element;
+		}
 
-    window.createElement = createElement;
+		element.setContent = (content) => {
+			setContent(element, content);
+			return element;
+		}
 
-    function createElementList(props = {}) {
+		element.addContent = (content) => {
+			addContent(element, content);
+			return element;
+		}
 
-        let elementList = new Array();
+		element.changeContent = (oldContent, newContent) => {
+			changeContent(element, oldContent, newContent);
+			return element;
+		}
 
-        if (typeof props.list != 'undefined') {
+		element.setText = (text) => {
+			setText(element, text);
+			return element;
+		}
 
-            if (Array.isArray(props.list)) {
+		element.addText = (text) => {
+			addText(element, text);
+			return element;
+		}
 
-                props.list.forEach((e) => {
-                    
-                    if (e != null) {
-                        elementList.push(createElement(Object.assign(props, e)));
-                    }
+		element.setHTML = (htmlString) => {
+			element.innerHTML = htmlString;
+			return element;
+		}
 
-                });
+		element.changeText = (oldText, newText) => {
+			changeText(element, oldText, newText);
+			return element;
+		}
 
-            } else if (typeof props.list == 'number') {
+		element.on = (props) => {
 
-                for (let i=0; i<props.list; i++) {
-                    elementList.push(createElement(props));
-                }
+			if (props.on == null) {
 
-            }
+				for (let event in props) {
+					on(element, event, props[event], props[event].passive);
+				}
 
-        }
+				return element;
 
-        return elementList;
+			}
 
-    }
+			if (Array.isArray(props)) {
 
-    window.createElementList = createElementList;
+				for (let event in props) {
 
-    window.elementManager = {
-        setDefaultMethods: setDefaultMethods
-    };
+					on(element, props[event].on, event, props[event].passive);
+
+				}
+
+			} else {
+				on(element, props.on, props.do, props.passive);
+			}
+
+			return element;
+
+		}
+
+		element.setClass = (className) => {
+			element.className = className;
+			return element;
+		}
+
+		element.addClass = (className) => {
+			element.classList.add(className);
+			return element;
+		}
+
+		element.removeClass = (className) => {
+			element.className = element.className.replace(className, '');
+			return element;
+		}
+
+		element.changeClass = (oldClassName, newClassName) => {
+			element.classList.remove(oldClassName);
+			element.classList.add(newClassName);
+			return element;
+		}
+
+		element.setID = (id) => {
+			element.id = id;
+			return element;
+		}
+
+		element.addID = (id) => {
+			element.id.concat(' ' + id);
+			return element;
+		}
+
+		element.changeID = (oldID, newID) => {
+			element.id = element.id.replace(oldID, newID);
+			return element;
+		}
+
+		element.setRipple = (color) => {
+			setRipple(element, color);
+			return element;
+		}
+
+		element.clear = () => {
+			clearElement(element);
+			return element;
+		}
+
+		element.setContextMenu = (menu, props = {
+			vertical: 0,
+			horizontal: 0
+		}) => {
+
+			setContextMenu({
+				element,
+				menu,
+				...props
+			});
+
+			return element;
+
+		}
+
+		return element;
+
+	}
+
+	function createElement(props = {}) {
+
+		let element = document.createElement(verify(props.tag) ? props.tag : 'div');
+
+		setDefaultMethods(element);
+
+		if (verify(props.id)) {
+			element.setID(props.id);
+		}
+
+		if (verify(props.class)) {
+
+			props.class.split(' ').forEach((className) => {
+				className != '' ? element.addClass(className) : '';
+			});
+
+		}
+
+		if (verify(props.content)) {
+			element.setContent(props.content);
+		}
+
+		if (verify(props.html)) {
+			element.setHTML(props.html);
+		}
+
+		if (verify(props.event)) {
+			element.on(props.event);
+		}
+
+		if (verify(props.style)) {
+
+			if (typeof props.style == 'string'
+				|| props.style instanceof StyleString) {
+				element.addClass(props.style);
+			} else {
+				element.setStyle(props.style);
+			}
+
+		}
+
+		if (verify(props.attributes)) {
+			element.setAttributes(props.attributes);
+		}
+
+		if (verify(props.ripple)) {
+			element.setRipple(props.ripple);
+		}
+
+		if (verify(props.contextMenu)) {
+			element.setContextMenu({ element, ...props.contextMenu });
+		}
+
+		return element;
+
+	}
+
+	window.createElement = createElement;
+
+	function createElementList(props = {}) {
+
+		let elementList = new Array();
+
+		if (typeof props.list != 'undefined') {
+
+			if (Array.isArray(props.list)) {
+
+				props.list.forEach((e) => {
+
+					if (e != null) {
+						elementList.push(createElement(Object.assign(props, e)));
+					}
+
+				});
+
+			} else if (typeof props.list == 'number') {
+
+				for (let i = 0; i < props.list; i++) {
+					elementList.push(createElement(props));
+				}
+
+			}
+
+		}
+
+		return elementList;
+
+	}
+
+	window.createElementList = createElementList;
+
+	window.elementManager = {
+		setDefaultMethods: setDefaultMethods
+	};
 
 })(window);
