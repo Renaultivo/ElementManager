@@ -158,8 +158,6 @@ community that uses this project.
 
 		}
 
-		styleName = new StyleString(StyleString);
-
 		elementManagerCSSNames.push(styleName);
 
 		createElementManagerCSSElement();
@@ -189,15 +187,13 @@ community that uses this project.
 
 					firstKey = Object.keys(jsObject[key][prop])[0];
 
-					if (typeof jsObject[key][prop][firstKey] == 'object') {
-
-						cssObject[key][prop] = createCSSObject(jsObject[key][prop]);
-
-					} else {
+					if (typeof jsObject[key][prop][firstKey] == 'string') {
 
 						cssObject[key][prop] = new StyleString(createCSS(jsObject[key][prop]));
 
-						console.log(cssObject[key][prop]);
+					} else {
+
+						cssObject[key][prop] = createCSSObject(jsObject[key][prop]);
 
 					}
 
